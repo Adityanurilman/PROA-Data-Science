@@ -1,106 +1,84 @@
-#Membaca Data External
-AL.Loan = read.csv("https://storage.googleapis.com/dqlab-dataset/project.csv")
+# # [Membaca Data External]
 
-#Inspeksi Data
-head(AL.Loan, 9)
+data = read.csv("https://storage.googleapis.com/dqlab-dataset/project.csv")
 
-#Tampilkan tipe data setiap kolomnya
-str(AL.Loan)
+# # [Inspeksi Data]
 
-#Statistik Deskriptif Data
-summary(AL.Loan$OSL)
-summary(AL.Loan)
+# Enam baris teratas data
+head(data)
+# Tampilkan tipe data setiap kolomnya
+str(data)
 
-#Menghapus Kolom
-#menghapus kolom yang tidak diperlukan
-data.guna = AL.Loan[-c(1,2)]
+# # [Statistik Deskriptif Data]
 
-#menampilkan nama kolom
-colnames(data.guna)
+summary(data)
 
-#Konversi Data
-cek.1 <- data.guna[, 8:11]
-head(cek.1, 9)
+# # [Menghapus Kolom]
 
-#Pemilihan Data Kategorik
-AL.Loan_kategorik = data.guna[,c("KONDISI_USAHA", "KONDISI_JAMINAN", "REKOMENDASI_TINDAK_LANJUT")]
-head(AL.Loan_kategorik, 9)
-data.guna$REKOMENDASI_TINDAK_LANJUT = as.factor(data.guna$REKOMENDASI_TINDAK_LANJUT)
-str(data.guna$REKOMENDASI_TINDAK_LANJUT)
+data_reduce = data[-c(1,2)]
+colnames(data_reduce)
 
-#melihat hubungan KONDISI_USAHA dengan REKOMENDASI_TINDAK_LANJUT
-chisq.test(AL.Loan_kategorik$KONDISI_USAHA, AL.Loan_kategorik$REKOMENDASI_TINDAK_LANJUT)
+# # [Konversi Data]
 
-#melihat hubungan KONDISI_JAMINAN dengan REKOMENDASI_TINDAK_LANJUT
-chisq.test(AL.Loan_kategorik$KONDISI_JAMINAN, AL.Loan_kategorik$REKOMENDASI_TINDAK_LANJUT)
+FALSE
 
-#Korelasi antar Variabel Data
+# # [Pemilihan Data Kategorik]
+
+data_kategorik = data_reduce[c("KONDISI_USAHA","KONDISI_JAMINAN","REKOMENDASI_TINDAK_LANJUT")]
+data_reduce$REKOMENDASI_TINDAK_LANJUT = as.factor(data_reduce$REKOMENDASI_TINDAK_LANJUT)
+chisq.test(data_kategorik$KONDISI_USAHA, data_kategorik$REKOMENDASI_TINDAK_LANJUT)
+chisq.test(data_kategorik$KONDISI_JAMINAN, data_kategorik$REKOMENDASI_TINDAK_LANJUT)
+
+# # [Korelasi antar Variabel Data]
 library("corrplot")
 library("ggcorrplot")
 
-M = data_reduce[,8:11]
+M = data_reduce[8:11]
 
-# Library corrplot
-# -- Pearson correlation
-par(mfrow=c(1,1))
-corrplot(cor(M), type="upper", order="hclust")
-corrplot(cor(M), method="square", type="upper")
-corrplot(cor(M), method="number", type="lower")
+#Library corrplot
+#Pearson correlation
+par(mfrow=c(2,2))
+corrplot::corrplot(cor(M), type = "upper", order = "hclust")
+corrplot::corrplot(cor(M), method = "square", type = "upper")
+corrplot::corrplot(cor(M), method = "number", type="lower")
+corrplot::corrplot(cor(M), method = "ellipse")
 
-corrplot(cor(M), method="ellipse")
+#Kendall correlation
+par(mfrow=c(2,2))
+corrplot::corrplot(cor(M, method = "kendall"), type = "upper", order = "hclust")
+corrplot::corrplot(cor(M, method = "kendall"), method = "square", type = "upper")
+corrplot::corrplot(cor(M, method = "kendall"), method ="number", type = "lower")
+corrplot::corrplot(cor(M, method = "kendall"), method ="ellipese")
+corrplot::corrplot(cor(M, method = "kendall"), method ="ellipse")
 
-# -- Kendall correlation
-par(mfrow=c(1,1))
-corrplot(cor(M, method="kendall"), type="upper", order="hclust")
-corrplot(cor(M, method="kendall"), method="square", type="upper")
-corrplot(cor(M, method="kendall"), method="number", type="lower")
-corrplot(cor(M, method="kendall"), method="ellipse")
-
-# Library ggcorrplot
+#Library ggcorrplot
 corr = round(cor(M), 1) # Pearson correlation
-ggcorrplot(round(cor(M), 1),
-             hc.order = TRUE,
-             type = "lower",
-             lab = TRUE,
-             lab_size = 3,
-             method="circle",
-             colors = c("tomato2", "white", "springgreen3"),
-             title="Correlogram of Data Nasabah",
-             ggtheme=theme_bw)
+ggcorrplot::ggcorrplot(round(cor(M),1), hc.order = TRUE, type = "lower", lab = TRUE, lab_size = 3, method = "circle", colors = c("tomato2","white","springgreen3"),title = "Correlogram of Data Nasabah", ggtheme =theme_bw)
 
-#Pemilihan Variabel
-colnames(data.guna)
+# # [Pemilihan fitur/independent variabel/input]
+colnames(data_reduce)
 
 #memilih kolom yang akan diproses
-data.pilih =
-data.guna[,c("KARAKTER","KONDISI_USAHA","KONDISI_JAMINAN","STATUS","KEWAJIBAN","OSL","KOLEKTIBILITAS","REKOMENDASI_TINDAK_LANJUT")]
-data.non.na = na.omit(data.pilih)
-head(data.non.na, 9)
+data_select = data_reduce [c("KARAKTER","KONDISI_USAHA","KONDISI_JAMINAN","STATUS","KEWAJIBAN","OSL","KOLEKTIBILITAS","REKOMENDASI_TINDAK_LANJUT")]
+data_non_na = na.omit(data_select)
 
-#Transformasi Data
-data.pilih.baru = data.pilih
-data.pilih.baru$KEWAJIBAN = scale(data.pilih.baru$KEWAJIBAN)[, 1]
-data.pilih.baru$OSL = scale(data.pilih.baru$OSL)[, 1]
-data.pilih.baru$KEWAJIBAN = cut(data.pilih.baru$KEWAJIBAN, breaks = c(-0.354107,5,15,30))
-data.pilih.baru$KEWAJIBAN = as.factor(data.pilih.baru$KEWAJIBAN)
-data.pilih.baru$OSL = cut(data.pilih.baru$OSL, breaks = c(-0.60383,3,10,15))
-data.pilih.baru$OSL = as.factor(data.pilih.baru$OSL)
-data.pilih.baru = na.omit(data.pilih.baru)
+# # [Transformasi Data]
+data_select_new = data_select
+data_select_new$KEWAJIBAN = scale(data_select_new$KEWAJIBAN)[, 1]
+data_select_new$OSL = scale(data_select_new$OSL)[, 1]
+data_select_new$KEWAJIBAN = cut(data_select_new$KEWAJIBAN, breaks = c(-0.354107,5,15,30))
+data_select_new$KEWAJIBAN = as.factor(data_select_new$KEWAJIBAN)
+data_select_new$OSL = cut(data_select_new$OSL, breaks= c(-0.60383,3,10,15))
+data_select_new$OSL = as.factor(data_select_new$OSL)
+data_select_new = na.omit(data_select_new)
 
-head(data.pilih.baru, 9)
+# # [Training Data]
+library(caret)
+index = createDataPartition(data_select_new$REKOMENDASI_TINDAK_LANJUT, p= .95, list = FALSE)
+train = data_select_new[index,]
+test = data_select_new[-index,]
 
-#Training Data
-library("caret")
-library("lattice")
-
-index = createDataPartition(data.pilih.baru$REKOMENDASI_TINDAK_LANJUT, p = .95, list = FALSE)
-training = data.pilih.baru[index, ]
-testing = data.pilih.baru[-index, ]
-
-dim(training)
-dim(testing)
-
-#Modelling
+# # [Modelling]
 train2 = training
 # Setting the reference
 train2$REKOMENDASI_TINDAK_LANJUT = relevel(train2$REKOMENDASI_TINDAK_LANJUT, ref = "Angsuran Biasa")
