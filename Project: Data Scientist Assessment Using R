@@ -1,0 +1,164 @@
+# # [Membuat Data Frame]
+df <- data.frame(a = c(11, 22, 33), b = c(44, 55, 66), c = c(77, 88, 99))
+df[,2] #akses kolom kedua
+df[1,2] #akses baris pertama, kolom kedua
+df[3,2] #akses baris ketiga, kolom kedua
+
+# # [Membuat Vector dan Index Position]
+X <- c("merah", "jingga", "hitam", "hijau", "biru", "ungu") #membuat variabel yang berisi vektor
+Y <- X[c(5,3,1)] #akses indeks ke-n
+Y
+
+# # [Mengisi Syntax Factor]
+X <- as.factor(c('grape','apples','pear','cherry','mango','panda')) #membuat variabel berisi factor
+X
+X[4] <- "apples" #mengganti isian factor
+AL
+
+# # [Menggunakan Function]
+add_number <- function(X, Y) {
+  X + Y
+}
+add_number(3, 3)
+
+# # [Mengganti Missing Value]
+df <- c(1,2,3,4,5,6,NA,7,8,9,NA)
+df
+mean_replace <- function(df) {+ df[is.na(df)] <- mean(df,na.rm = TRUE) + return(df)}
+df <- mean_replace(df)
+df
+
+# # [Mencari Hubungan]
+library(readr)
+
+Pohon <- read_csv("https://storage.googleapis.com/dqlab-dataset/trees.csv", header = True)
+Pohon
+
+#menampilkan nama kolom
+names(Pohon)
+
+#menampilkan tipe data
+str(Pohon)
+
+#mengubah nama kolom
+names(Pohon)[1] <- "Diameter"
+#membuat kolom baru (diameter.ft)
+Pohon$diameter.ft <- Pohon$Diameter*0.08333 #konversi inch ke ft
+#menampilkan beberapa baris data
+head(Pohon)
+
+#menampilkan hasil Statistik
+summary(Pohon)
+
+#mengecek missing value
+is.na(Pohon)
+
+#uji normalitas kolom Height
+shapiro.test(Pohon$Height)
+
+#uji normalitas kolom Volume
+shapiro.test(Pohon$Volume)
+
+#uji normalitas kolom diameter.ft
+shapiro.test(Pohon$diameter.ft)
+
+plot(density(Pohon$Volume))
+
+#menggunakan Regresi untuk mencari huubungan antara Volume dengan Tinggi dan Diameter(ft)
+lm(formula = Volume ~ Height + diameter.ft, data = pohon) #perhatikan posisi kolom dalam dataset di rumus Regresi nya
+
+#melihat hubungan antara diameter.ft terhadap volume 
+plot(Pohon$diameter.ft, Pohon$Volume)
+
+#melihat hubungan antara height terhadap volume
+plot(Pohon$Height, Pohon$Volume)
+
+# # [Analisa Efek Pemberian Obat Tidur]
+#set library yang dibutuhkan
+library(readr)
+library(dplyr)
+
+#membuat variabel dataset
+sleep_df <- read_csv('https://storage.googleapis.com/dqlab-dataset/sleep.csv', header = TRUE) 
+sleep_df
+
+#simpan data dalam 2 data.frame/vector berbeda
+group1 <- filter(sleep_df, sleep_df$group == 1)
+group2 <- filter(sleep_df, sleep_df$group == 2)
+
+#melakukan t-test
+t_test <- t.test(group1$extra, group2$extra)
+t_test
+
+#cara 2
+library(tidyverse)
+library(readr)
+
+Bobo_AL <- read_csv('https://storage.googleapis.com/dqlab-dataset/sleep.csv', header = TRUE)
+
+#langsung t-test tanpa membagi data
+t_test <- t.test(extra ~ group, data = Bobo_AL)
+t_test
+
+# # [Menghasilkan Grafik - Boxplot]
+#set library yang digunakan
+library(ggplot2)
+
+#membuat boxplot
+ggplot(Tidur_AL, aes(x=as.character(group), y=extra, fill=as.character(group))) + geom_boxplot()
+
+
+# # [Pembelajaran Mesin dengan R]
+#set library yang dibutuhkan
+library(readr)
+
+#membuat variabel dataset
+tagihan_listrik <- read_csv("https://storage.googleapis.com/dqlab-dataset/electric_bill.csv", header = TRUE)
+head(tagihan.listrik, 9)
+
+#membuat Regresi untuk mencari hubungan
+lm(amount_paid ~  num_people + housearea, data=tagihan_listrik)
+
+# # [Training dan Testing]
+#set library yang dibutuhkan
+library(readr)
+library(caret)
+set.seed(123)
+iris_AL <- read_csv("https://storage.googleapis.com/dqlab-dataset/iris.csv", header = TRUE)
+head(iris_AL, 9)
+
+#membagi dataset
+trainIndex <- createDataPartition(iris_AL$Species, p=0.8, list=FALSE)
+training <- iris_AL[trainIndex, ]
+testing <- iris_AL[-trainIndex, ]
+dim(training)
+dim(testing)
+tail(training, 30)
+testing
+
+# # [Model Decision Tree]
+#set library yang dibutuhkan
+library(caret) 
+library(rpart)
+library(readr)
+set.seed(123) #membuat pengacakan konsisten
+
+#membuat variabel dataset
+beli_AL <- read_csv("https://storage.googleapis.com/dqlab-dataset/suv_data.csv", header = TRUE)
+head(beli_AL, 9)
+
+#membagi data ke training dan testing
+trainIndex <- createDataPartition(beli_AL$Purchased, p=0.8, list=FALSE)
+training <- beli_AL[trainIndex, ]
+testing <- beli_AL[-trainIndex, ]
+
+#membuat model dengan decision tree
+pohon_kep <- rpart(Purchased ~ ., data = training, method="class")
+prediksi <- predict(pohon_kep, newdata = testing, type = "class")
+
+#evaluasi performance dengan data testing
+testing.beli <- factor(testing$Purchased)
+
+#menampilkan hasil evaluasi model 
+hasil.eval <- confusionMatrix(prediksi,testing.beli)
+hasil.eval
